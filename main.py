@@ -16,6 +16,8 @@ def main():
     print(f"Total started calls: {stats['total_started']}")
     print(f"Total completed calls: {stats['total_completed']}")
     print(f"Total rejected calls: {stats['total_rejected']}")
+    print(f"Average wait time: {stats['avg_wait_time']:.2f}")
+    print(f"Average service time: {stats['avg_service_time']:.2f}")
     print(f"Total events: {len(stats['events'])}")
 
 

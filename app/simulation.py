@@ -26,6 +26,10 @@ class Simulation:
     def run(self, duration: float, delta_time: float = 0.1):
         while self.clock < duration:
             self.tick(delta_time)
+        
+        while not self.buffer.is_empty() or any(not op.is_free(self.clock) for op in self.operators):
+            self.clock += delta_time
+            self.dispatcher.update_operators(self.clock)
     
     def get_stats(self):
         return self.metrics.get_stats()

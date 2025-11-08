@@ -29,7 +29,7 @@ class Dispatcher:
                 break
             
             free_operator.take_call(call, now)
-            self.metrics.log_start(call, free_operator.id)
+            self.metrics.log_start(call, free_operator.id, now)
     
     def _find_free_operator(self, now: float) -> Optional[Operator]:
         for operator in self.operators:
