@@ -22,4 +22,7 @@ class Operator:
     
     def get_current_call(self) -> Optional[Call]:
         return self._current_call
+    
+    def should_finish_call(self, now: float) -> bool:
+        return self._current_call is not None and now >= self._busy_until
 

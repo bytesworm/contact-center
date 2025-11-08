@@ -39,7 +39,7 @@ class Dispatcher:
     
     def update_operators(self, now: float):
         for operator in self.operators:
-            if not operator.is_free(now) and operator._busy_until <= now:
+            if operator.should_finish_call(now):
                 call = operator.finish_call()
                 if call:
                     self.metrics.log_done(call, now)
