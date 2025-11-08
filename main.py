@@ -1,0 +1,24 @@
+from app.simulation import Simulation
+
+
+def main():
+    lambda_rate = 0.5
+    buffer_size = 10
+    num_operators = 2
+    duration = 100.0
+    
+    sim = Simulation(lambda_rate, buffer_size, num_operators)
+    sim.run(duration)
+    
+    stats = sim.get_stats()
+    
+    print("Simulation Results:")
+    print(f"Total started calls: {stats['total_started']}")
+    print(f"Total completed calls: {stats['total_completed']}")
+    print(f"Total rejected calls: {stats['total_rejected']}")
+    print(f"Total events: {len(stats['events'])}")
+
+
+if __name__ == "__main__":
+    main()
+
