@@ -1,7 +1,7 @@
 from .simulation import Simulation
 
 
-def main():
+def main() -> None:
     lambda_rate = 0.5
     buffer_size = 10
     num_operators = 2

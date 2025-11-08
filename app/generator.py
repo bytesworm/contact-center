@@ -4,7 +4,7 @@ from .call import Call
 
 
 class Generator:
-    def __init__(self, lambda_rate: float):
+    def __init__(self, lambda_rate: float) -> None:
         self.lambda_rate = lambda_rate
         self._next_arrival_time = None
         self._call_counter = 0

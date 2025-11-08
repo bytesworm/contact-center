@@ -6,19 +6,19 @@ from .metrics import Metrics
 
 
 class Dispatcher:
-    def __init__(self, buffer: Buffer, operators: List[Operator], metrics: Metrics):
+    def __init__(self, buffer: Buffer, operators: List[Operator], metrics: Metrics) -> None:
         self.buffer = buffer
         self.operators = operators
         self.metrics = metrics
     
-    def on_arrival(self, call: Call, now: float):
+    def on_arrival(self, call: Call, now: float) -> None:
         if not self.buffer.enqueue(call):
             self.metrics.log_reject("overflow", now, call.id)
             return
         
         self.try_dispatch(now)
     
-    def try_dispatch(self, now: float):
+    def try_dispatch(self, now: float) -> None:
         while not self.buffer.is_empty():
             free_operator = self._find_free_operator(now)
             if free_operator is None:
@@ -37,7 +37,7 @@ class Dispatcher:
                 return operator
         return None
     
-    def update_operators(self, now: float):
+    def update_operators(self, now: float) -> None:
         for operator in self.operators:
             if operator.should_finish_call(now):
                 call = operator.finish_call()
@@ -45,7 +45,7 @@ class Dispatcher:
                     self.metrics.log_done(call, now)
                 self.try_dispatch(now)
     
-    def remove_call_from_queue(self, call: Call, now: float):
+    def remove_call_from_queue(self, call: Call, now: float) -> None:
         if self.buffer.remove_call(call):
             self.metrics.log_reject("hangup", now, call.id)
 

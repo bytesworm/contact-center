@@ -3,7 +3,7 @@ from .call import Call
 
 
 class Buffer:
-    def __init__(self, size: int):
+    def __init__(self, size: int) -> None:
         self.size = size
         self._queue: List[Call] = []
     

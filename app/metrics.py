@@ -3,7 +3,7 @@ from .call import Call
 
 
 class Metrics:
-    def __init__(self):
+    def __init__(self) -> None:
         self.events: List[Dict] = []
         self.rejected_calls: int = 0
         self.completed_calls: int = 0
@@ -12,7 +12,7 @@ class Metrics:
         self._call_wait_times: List[float] = []
         self._call_service_times: List[float] = []
     
-    def log_start(self, call: Call, operator_id: int, start_time: float):
+    def log_start(self, call: Call, operator_id: int, start_time: float) -> None:
         self.started_calls += 1
         self._call_start_times[call.id] = start_time
         wait_time = start_time - call.arrival_time
@@ -24,7 +24,7 @@ class Metrics:
             'time': start_time
         })
     
-    def log_done(self, call: Call, finish_time: float):
+    def log_done(self, call: Call, finish_time: float) -> None:
         self.completed_calls += 1
         if call.id in self._call_start_times:
             service_time = finish_time - self._call_start_times[call.id]
@@ -35,7 +35,7 @@ class Metrics:
             'time': finish_time
         })
     
-    def log_reject(self, reason: str, time: float, call_id: int = None):
+    def log_reject(self, reason: str, time: float, call_id: int = None) -> None:
         self.rejected_calls += 1
         self.events.append({
             'type': 'reject',

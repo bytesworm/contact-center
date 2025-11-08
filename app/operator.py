@@ -3,7 +3,7 @@ from .call import Call
 
 
 class Operator:
-    def __init__(self, operator_id: int):
+    def __init__(self, operator_id: int) -> None:
         self.id = operator_id
         self._busy_until: float = 0.0
         self._current_call: Optional[Call] = None
@@ -11,7 +11,7 @@ class Operator:
     def is_free(self, now: float) -> bool:
         return now >= self._busy_until
     
-    def take_call(self, call: Call, now: float):
+    def take_call(self, call: Call, now: float) -> None:
         self._current_call = call
         self._busy_until = now + call.service_time
     
