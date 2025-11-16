@@ -1,9 +1,19 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class Call:
-    def __init__(self, call_id: int, source_id: int, arrival_time: float, service_time: float) -> None:
-        self.id = call_id
-        self.source_id = source_id
-        self.arrival_time = arrival_time
-        self.service_time = service_time
+    call_id: int
+    source_id: int
+    arrival_time: float
+    service_time: float
+    
+    @property
+    def id(self) -> int:
+        return self.call_id
     
     def __repr__(self) -> str:
-        return f"Call(id={self.id}, source={self.source_id}, arrival={self.arrival_time:.2f}, service={self.service_time:.2f})"
+        return (
+            f"Call(id={self.call_id}, source={self.source_id}, "
+            f"arrival={self.arrival_time:.2f}, service={self.service_time:.2f})"
+        )
