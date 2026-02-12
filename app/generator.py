@@ -6,7 +6,9 @@ from .call import Call
 
 
 class Generator:
-    def __init__(self, lambda_rate: Sequence[float] | float, num_sources: int) -> None:
+    def __init__(self, lambda_rate: Sequence[float] | float, num_sources: int,
+                 service_range: tuple[float, float] = (1.0, 10.0)) -> None:
+        self.service_lo, self.service_hi = service_range
         if isinstance(lambda_rate, Sequence):
             if len(lambda_rate) != num_sources:
                 raise ValueError("Количество интенсивностей не совпадает с количеством источников")
@@ -20,7 +22,6 @@ class Generator:
 
     def _schedule_next(self, source_id: int, now: float) -> None:
         rate = self.lambda_rates[source_id - 1]
-        # экспоненциальный интервал → пуассоновский поток
         interval = np.random.exponential(1.0 / rate)
         self._next_arrival_time[source_id] = now + interval
 
@@ -35,7 +36,7 @@ class Generator:
                 continue
 
             if now >= target_time:
-                service_time = float(np.random.uniform(1.0, 10.0))
+                service_time = float(np.random.uniform(self.service_lo, self.service_hi))
                 call = Call(
                     call_id=self._call_counter,
                     source_id=source_id,

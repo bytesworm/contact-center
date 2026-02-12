@@ -15,9 +15,10 @@ class Simulation:
         buffer_size: int,
         num_operators: int,
         num_sources: int = 2,
+        service_range: tuple[float, float] = (1.0, 10.0),
     ) -> None:
         self.clock = 0.0
-        self.generator = Generator(lambda_rate, num_sources)
+        self.generator = Generator(lambda_rate, num_sources, service_range)
         self.buffer = Buffer(buffer_size)
         self.operators = [Operator(i + 1) for i in range(num_operators)]
         self.metrics = Metrics()
