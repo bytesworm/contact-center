@@ -136,6 +136,8 @@ def build_parser() -> argparse.ArgumentParser:
     group.add_argument("-l", "--lambda-rate", type=float, default=0.6, help="Интенсивность λ на источник (по умолчанию: 0.6)")
     group.add_argument("-m", "--operators", type=int, default=3, help="Количество приборов (по умолчанию: 3)")
     group.add_argument("-b", "--buffer-size", type=int, default=8, help="Размер буфера (по умолчанию: 8)")
+    group.add_argument("-s", "--service", type=float, nargs=2, default=[1.0, 10.0],
+                       metavar=("MIN", "MAX"), help="Диапазон времени обслуживания (по умолчанию: 1 10)")
 
     group2 = parser.add_argument_group("управление моделированием")
     group2.add_argument("--steps", type=int, default=30, help="Шагов в пошаговом режиме (по умолчанию: 30)")
@@ -156,6 +158,7 @@ def main() -> None:
         buffer_size=args.buffer_size,
         num_operators=args.operators,
         num_sources=args.sources,
+        service_range=tuple(args.service),
     )
 
     if args.mode == "step":
