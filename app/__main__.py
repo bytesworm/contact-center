@@ -4,57 +4,69 @@ import argparse
 from typing import Dict, List
 from .simulation import Simulation
 
+EVENT_LABELS = {
+    "generated": "Заявка создана",
+    "buffered": "В буфер",
+    "sent_to_operator": "Передана оператору",
+    "processing_started": "Обслуживание начато",
+    "processing_completed": "Обслуживание завершено",
+    "reject": "ОТКАЗ",
+}
+
 
 def print_step(step_num: int, sim: Simulation, snapshot: Dict) -> None:
     cal = sim.get_calendar()
 
-    print(f"\n{'='*60}")
-    print(f"  Шаг {step_num}   t = {snapshot['time']:.2f}")
-    print(f"{'='*60}")
+    print(f"\n{'='*65}")
+    print(f"  Шаг {step_num}   t = {snapshot['time']:.2f} е.в.")
+    print(f"{'='*65}")
 
     print(f"\n  Календарь событий")
-    print(f"  {'Событие':<12} {'Время':>8} {'Число заявок':>14} {'Число отказов':>15}")
-    print(f"  {'-'*12} {'-'*8} {'-'*14} {'-'*15}")
+    print(f"  {'Источник':<12} {'След. заявка':>13} {'Создано':>8} {'Отказов':>8}")
+    print(f"  {'-'*12} {'-'*13} {'-'*8} {'-'*8}")
     for source_id in sorted(cal["sources"].keys()):
         t_next = cal["sources"][source_id]
         t_str = f"{t_next:.2f}" if t_next is not None else "—"
         n_gen = cal["source_generated"].get(source_id, 0)
         n_rej = cal["source_rejected"].get(source_id, 0)
-        print(f"  {'И' + str(source_id):<12} {t_str:>8} {n_gen:>14} {n_rej:>15}")
+        print(f"  {'И' + str(source_id):<12} {t_str:>13} {n_gen:>8} {n_rej:>8}")
+
+    print()
+    print(f"  {'Оператор':<12} {'Освобождение':>13} {'Статус':>20}")
+    print(f"  {'-'*12} {'-'*13} {'-'*20}")
     for op in cal["operators"]:
-        status = "свободен" if op["call_id"] is None else f"#{op['call_id']}"
+        if op["call_id"] is None:
+            status = "свободен"
+        else:
+            status = f"обслуживает #{op['call_id']}"
         t_str = f"{op['release_time']:.2f}"
-        print(f"  {'П' + str(op['id']):<12} {t_str:>8} {status:>14}")
+        print(f"  {'П' + str(op['id']):<12} {t_str:>13} {status:>20}")
     print()
 
     slots = cal["buffer_slots"]
     ptrs = cal["pointers"]
-    print(f"  Буфер (УБвст={ptrs['insert']}, УБвыб={ptrs['remove']})")
+    print(f"  Буфер (указатель вставки={ptrs['insert']}, указатель выборки={ptrs['remove']})")
     if slots:
-        print(f"  {'Позиция':>8} {'Время':>8} {'Источник':>10} {'Заявка':>8}")
-        print(f"  {'-'*8} {'-'*8} {'-'*10} {'-'*8}")
+        print(f"  {'Позиция':>8} {'Время прих.':>12} {'Источник':>10} {'№ заявки':>10}")
+        print(f"  {'-'*8} {'-'*12} {'-'*10} {'-'*10}")
         for slot in slots:
-            print(f"  {slot['position']:>8} {slot['time']:>8.2f} {slot['source']:>10} {slot['call_id']:>8}")
+            print(f"  {slot['position']:>8} {slot['time']:>12.2f} {'И' + str(slot['source']):>10} {'#' + str(slot['call_id']):>10}")
     else:
         print("  (пусто)")
     print()
 
-    print(f"  Текущее состояние")
-    for op in cal["operators"]:
-        if op["call_id"] is None:
-            print(f"    П{op['id']}: свободен")
-        else:
-            print(f"    П{op['id']}: обслуживает #{op['call_id']} → освобождение {op['release_time']:.2f}")
-    print(f"    Процент отказов: {snapshot['reject_percent']:.2f}%")
+    print(f"  Вероятность отказа: {snapshot['reject_percent']:.2f}%")
 
     events = snapshot["events"]
     if events:
-        print(f"\n  События шага:")
+        print(f"\n  События на этом шаге:")
         for ev in events:
             call_id = ev.get("call_id")
-            label = ev["type"]
+            label = EVENT_LABELS.get(ev["type"], ev["type"])
             if call_id is not None:
-                label += f" #{call_id}"
+                label += f" (заявка #{call_id})"
+            if ev.get("reason"):
+                label += f" — {ev['reason']}"
             print(f"    t={ev['time']:.2f}  {label}")
 
 
@@ -67,14 +79,14 @@ def run_step_mode(sim: Simulation, steps: int, delta: float) -> None:
 
 
 def print_event_log(events: List[Dict]) -> None:
-    print(f"\n{'='*60}")
+    print(f"\n{'='*65}")
     print(f"  Журнал событий ({len(events)} записей)")
-    print(f"{'='*60}")
-    print(f"  {'t':>8}  {'Событие':<25} {'Детали'}")
-    print(f"  {'-'*8}  {'-'*25} {'-'*30}")
+    print(f"{'='*65}")
+    print(f"  {'Время':>8}  {'Событие':<28} {'Детали'}")
+    print(f"  {'-'*8}  {'-'*28} {'-'*30}")
     for ev in events:
         t = ev["time"]
-        etype = ev["type"]
+        label = EVENT_LABELS.get(ev["type"], ev["type"])
         parts = []
         if ev.get("call_id") is not None:
             parts.append(f"заявка #{ev['call_id']}")
@@ -85,14 +97,14 @@ def print_event_log(events: List[Dict]) -> None:
         if ev.get("reason"):
             parts.append(ev["reason"])
         detail = ", ".join(parts)
-        print(f"  {t:>8.2f}  {etype:<25} {detail}")
+        print(f"  {t:>8.2f}  {label:<28} {detail}")
 
 
 def run_auto_mode(sim: Simulation, duration: float, delta: float, graph_dir: str) -> None:
     stats = sim.run_auto_mode(duration, delta, graph_dir)
 
     print(f"\nАвтоматический режим завершён.")
-    print(f"Время моделирования (реализации): {sim.clock:.2f}")
+    print(f"Время моделирования: {sim.clock:.2f} е.в.")
     print(f"Всего заявок: {stats['total_started'] + stats['total_rejected']}")
     print(f"Обслужено: {stats['total_completed']}")
     print(f"Отказано: {stats['total_rejected']}")
@@ -100,22 +112,22 @@ def run_auto_mode(sim: Simulation, duration: float, delta: float, graph_dir: str
 
     source_stats = sim.metrics.per_source_stats()
     print("  Таблица 1. Характеристики источников")
-    print(f"  {'Источник':<10} {'Заявок':>7} {'pотк':>8} {'Tпреб':>8} {'TБП':>8} {'Tобсл':>8} {'ДБП':>8} {'Добсл':>8}")
-    print(f"  {'-'*10} {'-'*7} {'-'*8} {'-'*8} {'-'*8} {'-'*8} {'-'*8} {'-'*8}")
+    print(f"  {'Источник':<10} {'Заявок':>7} {'P(отк),%':>9} {'M(сист)':>8} {'M(ожид)':>8} {'M(обсл)':>8} {'D(ожид)':>8} {'D(обсл)':>8}")
+    print(f"  {'-'*10} {'-'*7} {'-'*9} {'-'*8} {'-'*8} {'-'*8} {'-'*8} {'-'*8}")
     for source_id, s in source_stats.items():
         print(
-            f"  {'И' + str(source_id):<10} {s['count']:>7} {s['p_otk']:>8.4f} "
+            f"  {'И' + str(source_id):<10} {s['count']:>7} {s['p_otk']*100:>9.2f} "
             f"{s['T_preb']:>8.2f} {s['T_bp']:>8.2f} {s['T_obsl']:>8.2f} "
             f"{s['D_bp']:>8.2f} {s['D_obsl']:>8.2f}"
         )
     print()
 
     utilization = {op.id: op.utilization(sim.clock) for op in sim.operators}
-    print("  Таблица 2. Характеристики приборов")
-    print(f"  {'Прибор':<10} {'Kисп':>8}")
-    print(f"  {'-'*10} {'-'*8}")
+    print("  Таблица 2. Характеристики приборов (операторов)")
+    print(f"  {'Оператор':<10} {'Загрузка,%':>10}")
+    print(f"  {'-'*10} {'-'*10}")
     for op_id in sorted(utilization.keys()):
-        print(f"  {'П' + str(op_id):<10} {utilization[op_id]:>8.4f}")
+        print(f"  {'П' + str(op_id):<10} {utilization[op_id]*100:>10.2f}")
     print()
 
     print(f"Файл с графиками: {stats['graph']}")
