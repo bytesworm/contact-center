@@ -58,7 +58,6 @@ class Dispatcher:
             self.metrics.log_reject("hangup", now, call)
 
     def _find_free_operator(self, now: float) -> Optional[Operator]:
-        """Д2П1: перебор с наименьшего номера."""
         for operator in self.operators:
             if operator.is_free(now):
                 return operator
