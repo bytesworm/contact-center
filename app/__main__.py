@@ -145,7 +145,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     group = parser.add_argument_group("параметры системы")
     group.add_argument("-n", "--sources", type=int, default=2, help="Количество источников (по умолчанию: 2)")
-    group.add_argument("-l", "--lambda-rate", type=float, default=0.6, help="Интенсивность λ на источник (по умолчанию: 0.6)")
+    group.add_argument("-l", "--lambda-rate", type=float, default=1, help="Интенсивность λ на источник (по умолчанию: 0.6)")
     group.add_argument("-m", "--operators", type=int, default=3, help="Количество приборов (по умолчанию: 3)")
     group.add_argument("-b", "--buffer-size", type=int, default=8, help="Размер буфера (по умолчанию: 8)")
     group.add_argument("-s", "--service", type=float, nargs=2, default=[1.0, 10.0],
